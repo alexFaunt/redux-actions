@@ -129,6 +129,25 @@ describe('handleAction()', () => {
         expect(reducer(prevState, { type })).to.equal(prevState);
       });
 
+      it('uses `first()` if action is still a promise', () => {
+        const reducer = handleAction(type, {
+          first: (state) => ({
+            ...state,
+            pending: true
+          })
+        }, defaultState);
+        expect(reducer(prevState, { type, payload: Promise.resolve(7) }))
+          .to.deep.equal({
+            counter: 3,
+            pending: true
+          });
+        expect(reducer(prevState, { type, payload: Promise.reject(new Error()) }))
+          .to.deep.equal({
+            counter: 3,
+            pending: true
+          });
+      });
+
       it('uses `next()` if action does not represent an error', () => {
         const reducer = handleAction(type, {
           next: (state, action) => ({
@@ -209,6 +228,27 @@ describe('handleAction()', () => {
         .to.deep.equal({ number: 0, threw: true });
       expect(reducer({ number: 0 }, { type: 'ACTION_3', payload: error, error: true }))
         .to.deep.equal({ number: 0, threw: true });
+    });
+
+    it('should handle combined first actions', () => {
+      const reducer = handleAction(combineActions('ACTION_1', 'ACTION_2'), {
+        first(state) {
+          return { ...state, pending: true };
+        },
+
+        next(state, { payload }) {
+          return { ...state, number: state.number + payload, pending: false };
+        },
+
+        throw(state) {
+          return { ...state, threw: true, pending: false };
+        }
+      }, defaultState);
+
+      expect(reducer({ number: 0 }, { type: 'ACTION_1', payload: Promise.resolve(7) }))
+        .to.deep.equal({ number: 0, pending: true });
+      expect(reducer({ number: 0 }, { type: 'ACTION_2', payload: Promise.reject(7) }))
+        .to.deep.equal({ number: 0, pending: true });
     });
 
     it('should return previous state if action is not one of the combined actions', () => {
