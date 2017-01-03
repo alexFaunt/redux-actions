@@ -23,7 +23,7 @@ export default function handleAction(actionType, reducer = identity, defaultStat
   );
 
   const reducerMap = isFunction(reducer)
-    ? { first: reducer, next: reducer, throw: reducer }
+    ? { next: reducer, throw: reducer }
     : reducer;
 
   return (state = defaultState, action) => {

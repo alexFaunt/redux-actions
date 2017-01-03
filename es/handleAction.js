@@ -22,7 +22,7 @@ export default function handleAction(actionType) {
   invariant(!isUndefined(defaultState), 'defaultState for reducer handling ' + actionTypes.join(', ') + ' should be defined');
   invariant(isFunction(reducer) || isPlainObject(reducer), 'Expected reducer to be a function or object with next and throw reducers');
 
-  var reducerMap = isFunction(reducer) ? { first: reducer, next: reducer, throw: reducer } : reducer;
+  var reducerMap = isFunction(reducer) ? { next: reducer, throw: reducer } : reducer;
 
   return function () {
     var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultState;
